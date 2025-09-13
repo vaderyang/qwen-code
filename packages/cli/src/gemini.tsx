@@ -332,7 +332,7 @@ export async function main() {
     config,
   );
 
-  await runNonInteractive(nonInteractiveConfig, input, prompt_id);
+  await runNonInteractive(nonInteractiveConfig, input, prompt_id, config.getJsonlOutput());
   process.exit(0);
 }
 

@@ -78,6 +78,7 @@ export interface CliArgs {
   proxy: string | undefined;
   includeDirectories: string[] | undefined;
   tavilyApiKey: string | undefined;
+  jsonl: boolean | undefined;
 }
 
 export async function parseArguments(): Promise<CliArgs> {
@@ -252,6 +253,11 @@ export async function parseArguments(): Promise<CliArgs> {
         .option('tavily-api-key', {
           type: 'string',
           description: 'Tavily API key for web search functionality',
+        })
+        .option('jsonl', {
+          type: 'boolean',
+          description: 'Output structured events in JSONL format (for non-interactive mode)',
+          default: false,
         })
 
         .check((argv) => {
@@ -604,6 +610,7 @@ export async function loadCliConfig(
     trustedFolder,
     shouldUseNodePtyShell: settings.shouldUseNodePtyShell,
     skipNextSpeakerCheck: settings.skipNextSpeakerCheck,
+    jsonlOutput: argv.jsonl || false,
   });
 }
 

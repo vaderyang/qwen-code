@@ -21,6 +21,7 @@ export async function runNonInteractive(
   config: Config,
   input: string,
   prompt_id: string,
+  jsonlOutput: boolean = false,
 ): Promise<void> {
   const consolePatcher = new ConsolePatcher({
     stderr: true,
@@ -70,9 +71,32 @@ export async function runNonInteractive(
         }
 
         if (event.type === GeminiEventType.Content) {
-          process.stdout.write(event.value);
+          if (jsonlOutput) {
+            const jsonlEvent = {
+              type: 'token',
+              data: event.value,
+              timestamp: new Date().toISOString(),
+            };
+            process.stdout.write(JSON.stringify(jsonlEvent) + '\n');
+          } else {
+            process.stdout.write(event.value);
+          }
         } else if (event.type === GeminiEventType.ToolCallRequest) {
           const toolCallRequest = event.value;
+          
+          if (jsonlOutput) {
+            const jsonlEvent = {
+              type: 'tool_call',
+              data: {
+                name: toolCallRequest.name,
+                args: toolCallRequest.args,
+                call_id: toolCallRequest.callId,
+              },
+              timestamp: new Date().toISOString(),
+            };
+            process.stdout.write(JSON.stringify(jsonlEvent) + '\n');
+          }
+          
           const fc: FunctionCall = {
             name: toolCallRequest.name,
             args: toolCallRequest.args,
@@ -100,6 +124,20 @@ export async function runNonInteractive(
             requestInfo,
             abortController.signal,
           );
+
+          if (jsonlOutput) {
+            const jsonlEvent = {
+              type: 'tool_result',
+              data: {
+                call_id: callId,
+                name: fc.name as string,
+                result: toolResponse.resultDisplay || (toolResponse.error ? toolResponse.error.message : 'Success'),
+                error: toolResponse.error ? toolResponse.error.message : null,
+              },
+              timestamp: new Date().toISOString(),
+            };
+            process.stdout.write(JSON.stringify(jsonlEvent) + '\n');
+          }
 
           if (toolResponse.error) {
             console.error(

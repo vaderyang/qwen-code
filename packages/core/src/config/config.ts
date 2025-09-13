@@ -233,6 +233,7 @@ export interface ConfigParameters {
   trustedFolder?: boolean;
   shouldUseNodePtyShell?: boolean;
   skipNextSpeakerCheck?: boolean;
+  jsonlOutput?: boolean;
 }
 
 export class Config {
@@ -318,6 +319,7 @@ export class Config {
   private readonly trustedFolder: boolean | undefined;
   private readonly shouldUseNodePtyShell: boolean;
   private readonly skipNextSpeakerCheck: boolean;
+  private readonly jsonlOutput: boolean;
   private initialized: boolean = false;
 
   constructor(params: ConfigParameters) {
@@ -399,6 +401,7 @@ export class Config {
     this.trustedFolder = params.trustedFolder;
     this.shouldUseNodePtyShell = params.shouldUseNodePtyShell ?? false;
     this.skipNextSpeakerCheck = params.skipNextSpeakerCheck ?? false;
+    this.jsonlOutput = params.jsonlOutput ?? false;
 
     // Web search
     this.tavilyApiKey = params.tavilyApiKey;
@@ -859,6 +862,10 @@ export class Config {
 
   getSkipNextSpeakerCheck(): boolean {
     return this.skipNextSpeakerCheck;
+  }
+
+  getJsonlOutput(): boolean {
+    return this.jsonlOutput;
   }
 
   async getGitService(): Promise<GitService> {

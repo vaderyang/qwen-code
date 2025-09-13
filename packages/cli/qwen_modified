@@ -1,0 +1,5 @@
+#!/usr/bin/env node
+
+// This is the modified qwen CLI with pcap/tshark support
+// Since this is an ES module, we need to import dynamically
+import('./dist/index.js');

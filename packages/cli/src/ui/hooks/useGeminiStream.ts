@@ -114,17 +114,21 @@ export const useGeminiStream = (
     return new GitService(config.getProjectRoot());
   }, [config]);
 
+  // Track timestamp for proper ordering
+  const currentUserMessageTimestampRef = useRef<number>(0);
+
   const [toolCalls, scheduleToolCalls, markToolsAsSubmitted] =
     useReactToolScheduler(
       async (completedToolCallsFromScheduler) => {
         // This onComplete is called when ALL scheduled tools for a given batch are done.
         if (completedToolCallsFromScheduler.length > 0) {
           // Add the final state of these tools to the history for display.
+          // Use the original userMessageTimestamp to maintain chronological order with text content
           addItem(
             mapTrackedToolCallsToDisplay(
               completedToolCallsFromScheduler as TrackedToolCall[],
             ),
-            Date.now(),
+            currentUserMessageTimestampRef.current,
           );
 
           // Handle tool response submission immediately when tools complete
@@ -668,6 +672,10 @@ export const useGeminiStream = (
       isSubmittingQueryRef.current = true;
 
       const userMessageTimestamp = Date.now();
+      // Update the timestamp reference for tool call ordering only for new queries (not continuations)
+      if (!options?.isContinuation) {
+        currentUserMessageTimestampRef.current = userMessageTimestamp;
+      }
 
       // Reset quota error flag when starting a new query (not a continuation)
       if (!options?.isContinuation) {
